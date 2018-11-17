@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
 using System.IO;
+using System.Security.AccessControl;
 
 namespace FileManager
 {
@@ -25,8 +26,12 @@ namespace FileManager
         public DirectoryInfo LDirectory { get; set; } = new DirectoryInfo(Config.LeftSectionPath);
         public DirectoryInfo RDirectory { get; set; } = new DirectoryInfo(Config.RightSectionPath);
 
+        private Searcher _searcher;
+
         public FileManager(string fileManagerName)
         {
+            _searcher = new Searcher();
+
             Console.BackgroundColor = Config.BackgroundColor;
             Console.ForegroundColor = Config.ForegroundColor;
             Console.SetWindowSize(Config.StartupWindowWidth, Config.StartupWindowHeight);
@@ -35,8 +40,21 @@ namespace FileManager
             Esection = ESection.Left;
             Directory.SetCurrentDirectory(Config.LeftSectionPath);
 
-            SetLeftSectionFiles();
-            SetRightSectionFiles();
+            // -------------------------------------------------------
+
+            LFiles = new ArrayList();
+            LFiles.Add(new FolderUp());
+            LFiles.AddRange(LDirectory.GetDirectories());
+            LFiles.AddRange(LDirectory.GetFiles());
+
+            LeftSection = new LeftSection(LFiles);
+
+            RFiles = new ArrayList();
+            RFiles.Add(new FolderUp());
+            RFiles.AddRange(RDirectory.GetDirectories());
+            RFiles.AddRange(RDirectory.GetFiles());
+
+            RightSection = new RightSection(RFiles);
         }
 
         public void ChangeSection()
@@ -90,6 +108,7 @@ namespace FileManager
                 LFiles.AddRange(results);
 
                 LeftSection = new LeftSection(LFiles);
+                LeftSection.IsDisplayingSearchResults = true;
             }
             else
             {
@@ -98,11 +117,18 @@ namespace FileManager
                 RFiles.AddRange(results);
 
                 RightSection = new RightSection(RFiles);
+                RightSection.IsDisplayingSearchResults = true;
             }
         }
 
         public void SetLeftSectionFiles()
         {
+            if (LeftSection.IsDisplayingSearchResults)
+            {
+                SetSearchResults(_searcher.GetResults());
+                return;
+            }
+
             LFiles = new ArrayList();
             LFiles.Add(new FolderUp());
             LFiles.AddRange(LDirectory.GetDirectories());
@@ -113,6 +139,12 @@ namespace FileManager
 
         public void SetRightSectionFiles()
         {
+            if (RightSection.IsDisplayingSearchResults)
+            {
+                SetSearchResults(_searcher.GetResults());
+                return;
+            }
+
             RFiles = new ArrayList();
             RFiles.Add(new FolderUp());
             RFiles.AddRange(RDirectory.GetDirectories());
@@ -139,14 +171,20 @@ namespace FileManager
 
         public void ChangeDirectory(string newPath)
         {
+            // check if user have access to folder
+            var tmp = new DirectoryInfo(newPath);
+            tmp.GetFiles();
+
             if (Esection == ESection.Left)
             {
-                LDirectory = new DirectoryInfo(newPath);
+                LDirectory = tmp;          
+                LeftSection.IsDisplayingSearchResults = false;
                 SetLeftSectionFiles();
             }
             else
             {
-                RDirectory = new DirectoryInfo(newPath);
+                RDirectory = tmp;
+                RightSection.IsDisplayingSearchResults = false;
                 SetRightSectionFiles();
             }
 
@@ -169,8 +207,16 @@ namespace FileManager
                 RightSection.DisplayFiles();
         }
 
-        public string GetSelectedPath()
+        public string GetSelectedPath(bool FullName = true)
         {
+            if (!FullName)
+            {
+                if (Esection == ESection.Left)
+                    return LeftSection.Cursor.FileNames[LeftSection.Cursor.Index];
+                else
+                    return RightSection.Cursor.FileNames[RightSection.Cursor.Index];
+            }
+
             if (Esection == ESection.Left)
             {
                 if (LeftSection.Cursor.Files[LeftSection.Cursor.Index] is DirectoryInfo)
@@ -209,7 +255,7 @@ namespace FileManager
             if (GetCurrentFile() is FileInfo)
                 File.Delete(GetSelectedPath());
             else if (GetCurrentFile() is DirectoryInfo)
-                Directory.Delete(GetSelectedPath());
+                Directory.Delete(GetSelectedPath(), true);
             else
                 return;
         }
@@ -219,18 +265,18 @@ namespace FileManager
             if (Esection == ESection.Left)
             {
                 if (GetCurrentFile() is FileInfo)
-                    (GetCurrentFile() as FileInfo).MoveTo(RPath + "\\" + GetSelectedPath());
+                    (GetCurrentFile() as FileInfo).MoveTo(RPath + "\\" + GetSelectedPath(false));
                 else if (GetCurrentFile() is DirectoryInfo)
-                    (GetCurrentFile() as DirectoryInfo).MoveTo(RPath + "\\" + GetSelectedPath());
+                    (GetCurrentFile() as DirectoryInfo).MoveTo(RPath + "\\" + GetSelectedPath(false));
                 else
                     return;
             }
             else
             {
                 if (GetCurrentFile() is FileInfo)
-                    (GetCurrentFile() as FileInfo).MoveTo(LPath + "\\" + GetSelectedPath());
+                    (GetCurrentFile() as FileInfo).MoveTo(LPath + "\\" + GetSelectedPath(false));
                 else if (GetCurrentFile() is DirectoryInfo)
-                    (GetCurrentFile() as DirectoryInfo).MoveTo(LPath + "\\" + GetSelectedPath());
+                    (GetCurrentFile() as DirectoryInfo).MoveTo(LPath + "\\" + GetSelectedPath(false));
                 else
                     return;
             }
@@ -294,6 +340,15 @@ namespace FileManager
                 return LPath;
             else
                 return RPath;
+        }
+
+        public void SearchFile(string name)
+        {
+            _searcher.Clear();
+            _searcher.Search(new DirectoryInfo(GetCurrentPath()), name);
+
+            try { SetSearchResults(_searcher.GetResults()); }
+            catch(Exception) { throw; }
         }
     }
 }

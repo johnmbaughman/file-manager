@@ -18,6 +18,7 @@ namespace FileManager
         public Cursor Cursor { get; private set; }
         public int X { get; private set; }
         public int Y { get; private set; }
+        public bool IsDisplayingSearchResults { get; set; }
 
         protected Section(int x, int y, ArrayList files, Cursor cursor)
         {
@@ -25,6 +26,7 @@ namespace FileManager
             Y = y;
             Files = files;
             Cursor = cursor;
+            IsDisplayingSearchResults = false;
         }
 
         public void DisplayFiles()

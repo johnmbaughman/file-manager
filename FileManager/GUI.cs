@@ -173,7 +173,7 @@ namespace FileManager
                 Console.SetCursorPosition(Config.HalfWindowWidth + 3, Config.WindowHeight);
 
             if (file is FileInfo)
-                Console.Write($"{(file as FileInfo).Length,+30}KBytes {(file as FileInfo).LastAccessTime}");
+                Console.Write($"{(file as FileInfo).Length,+30} Bytes {(file as FileInfo).LastAccessTime}");
             else if (file is DirectoryInfo)
                 Console.Write($"{"Folder",+36} {(file as DirectoryInfo).LastWriteTime}");
             else if (file is FolderUp)

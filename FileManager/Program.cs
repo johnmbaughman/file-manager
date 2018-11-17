@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
+using System.Security.AccessControl;
 
 namespace FileManager
 {
@@ -59,7 +60,8 @@ namespace FileManager
                             {
                                 if (manager.GetCurrentFile() is FileInfo)
                                 {
-                                    Process.Start((manager.GetCurrentFile() as FileInfo).Name);
+                                    try { Process.Start((manager.GetCurrentFile() as FileInfo).Name); }
+                                    catch (Exception) { }
                                     break;
                                 }
                                 try
@@ -75,10 +77,9 @@ namespace FileManager
                                         InfMsgBox.Text = "You don't have permissions enough.";
                                         InfMsgBox.GetMessageBox();
                                     }
-
-                                    manager.ChangeDirectory(".");
                                     manager.Reload();
                                 }
+
                                 canReturn = true;
                             }
                             break;
@@ -196,10 +197,7 @@ namespace FileManager
                             break;
                         case ConsoleKey.F7:
                             {
-                                FileSearcher.Clear();
                                 string search;
-                                ArrayList searchRes = null;
-
                                 try
                                 { search = TextBox.GetMessageBox(); }
                                 catch (Exception)
@@ -209,14 +207,9 @@ namespace FileManager
                                     break;
                                 }
 
-                                FileSearcher.Search(new DirectoryInfo(manager.GetCurrentPath()), search);
                                 try
                                 {
-                                    searchRes = FileSearcher.GetResults();
-
-                                    manager.Reload();
-                                    manager.SetSearchResults(searchRes);
-                                    manager.DisplayFiles();
+                                    manager.SearchFile(search);
                                 }
                                 catch (Exception ex)
                                 {
@@ -232,9 +225,9 @@ namespace FileManager
                                         InfMsgBox.Text = "Name contains incorrect symbols.";
                                         InfMsgBox.GetMessageBox();
                                     }
-                                    manager.Reload();
                                 }
 
+                                manager.Reload();
                                 canReturn = true;
                             }
                             break;
