@@ -65,7 +65,7 @@ namespace FileManager
                                     break;
                                 }
                                 try
-                                {
+                                { 
                                     manager.ChangeDirectory(manager.GetSelectedPath());
                                     manager.DisplayFiles();
                                 }
@@ -171,6 +171,19 @@ namespace FileManager
                                 canReturn = true;
                             }
                             break;
+                        case ConsoleKey.F4:
+                            {
+                                InfMsgBox.Action = "Attributes";
+                                try
+                                { InfMsgBox.Text = manager.GetFileAttributes(); }
+                                catch (Exception) { break; }
+
+                                InfMsgBox.GetMessageBox();
+
+                                manager.Reload();
+                                canReturn = true;
+                            }
+                            break;
                         case ConsoleKey.F8:
                             {
                                 MsgBox.Action = "Delete";
@@ -178,6 +191,18 @@ namespace FileManager
 
                                 if (MsgBox.GetMessageBox())
                                     manager.DeleteCurrentFile();
+
+                                manager.Reload();
+                                canReturn = true;
+                            }
+                            break;
+                        case ConsoleKey.F5:
+                            {
+                                MsgBox.Action = "Copy";
+                                MsgBox.Text = "Do you really want to copy?";
+
+                                if (MsgBox.GetMessageBox())
+                                    manager.CopyCurrentFile();
 
                                 manager.Reload();
                                 canReturn = true;

@@ -237,11 +237,14 @@ namespace FileManager
             }
         }
 
-        public void Reload()
+        public void Reload(bool RefreshFilesList = true)
         {
-            SetLeftSectionFiles();
-            SetRightSectionFiles();
-
+            if (RefreshFilesList)
+            {
+                SetLeftSectionFiles();
+                SetRightSectionFiles();
+            }
+            
             GUI.DrawMenu(FileManagerName);
 
             LeftSection.DisplayFiles();
@@ -282,6 +285,32 @@ namespace FileManager
             }
         }
 
+        public void CopyCurrentFile()
+        {
+            if (Esection == ESection.Left)
+            {
+                if (GetCurrentFile() is FileInfo)
+                    (GetCurrentFile() as FileInfo).CopyTo(RPath + "\\" + GetSelectedPath(false));
+                else if (GetCurrentFile() is DirectoryInfo)
+                    Helper.CopyFolder(new DirectoryInfo(GetSelectedPath()), RPath);
+                else
+                    return;
+
+                Directory.SetCurrentDirectory(LPath);
+            }
+            else
+            {
+                if (GetCurrentFile() is FileInfo)
+                    (GetCurrentFile() as FileInfo).CopyTo(LPath + "\\" + GetSelectedPath(false));
+                else if (GetCurrentFile() is DirectoryInfo)
+                    Helper.CopyFolder(new DirectoryInfo(GetSelectedPath()), LPath);
+                else
+                    return;
+
+                Directory.SetCurrentDirectory(RPath);
+            }
+        }
+
         public void DisplayFilesFromTwoSections()
         {
             LeftSection.DisplayFiles();
@@ -315,6 +344,25 @@ namespace FileManager
             }
 
             return inf;
+        }
+
+        public string GetFileAttributes()
+        {
+            if (GetSelectedPath() == "..")
+                throw new Exception("This is not file");
+
+            if (GetCurrentFile() is FileInfo)
+            {
+                var currentFile = GetCurrentFile() as FileInfo;
+
+                return currentFile.Attributes.ToString();
+            }
+            else
+            {
+                var currentFile = GetCurrentFile() as DirectoryInfo;
+
+                return currentFile.Attributes.ToString();
+            }
         }
 
         public void CreateFolder(string name)

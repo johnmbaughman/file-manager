@@ -32,7 +32,7 @@ namespace FileManager
         public void DisplayFiles()
         {
             GUI.CleanScreen(X, Y);
-
+            
             GUI.DrawFiles(Files, X, Y, 0, Config.FilesCountTwoSections);
         }
     }
