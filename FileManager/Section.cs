@@ -12,13 +12,18 @@ namespace FileManager
         Left, Right
     }
 
+    public enum IsDisplaying
+    {
+        Files, Search, Disks
+    }
+
     public abstract class Section
     {
         public ArrayList Files { get; set; }
         public Cursor Cursor { get; private set; }
         public int X { get; private set; }
         public int Y { get; private set; }
-        public bool IsDisplayingSearchResults { get; set; }
+        public IsDisplaying Displaying { get; set; }
 
         protected Section(int x, int y, ArrayList files, Cursor cursor)
         {
@@ -26,7 +31,7 @@ namespace FileManager
             Y = y;
             Files = files;
             Cursor = cursor;
-            IsDisplayingSearchResults = false;
+            Displaying = IsDisplaying.Files;
         }
 
         public void DisplayFiles()

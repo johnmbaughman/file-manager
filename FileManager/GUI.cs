@@ -59,12 +59,12 @@ namespace FileManager
 
         public static void DrawBottomPanel()
         {
-            int num = Config.WindowWidth / 15;
+            int num = (Config.WindowWidth - 95) / 10;
             Console.SetCursorPosition(1, Console.WindowHeight - 1);
             Console.BackgroundColor = Config.MsgBoxBackgroundColor;
             Console.ForegroundColor = Config.MsgBoxForegroundColor;
 
-            Console.Write("F1 View");
+            Console.Write("F1 Info");
             Console.SetCursorPosition(Console.CursorLeft + num, Console.WindowHeight - 1);
 
             Console.Write("F2 MkFile");
@@ -86,6 +86,15 @@ namespace FileManager
             Console.SetCursorPosition(Console.CursorLeft + num, Console.WindowHeight - 1);
 
             Console.Write("F8 Delete");
+            Console.SetCursorPosition(Console.CursorLeft + num, Console.WindowHeight - 1);
+
+            Console.Write("F9 Disks");
+            Console.SetCursorPosition(Console.CursorLeft + num, Console.WindowHeight - 1);
+
+            Console.Write("F10 Rename");
+            Console.SetCursorPosition(Console.CursorLeft + num, Console.WindowHeight - 1);
+
+            Console.Write("F12 Exit");
 
             Console.BackgroundColor = Config.BackgroundColor;
             Console.ForegroundColor = Config.ForegroundColor;
@@ -178,6 +187,8 @@ namespace FileManager
                 Console.Write($"{"Folder",+36} {(file as DirectoryInfo).LastWriteTime}");
             else if (file is FolderUp)
                 Console.Write($"{"UP",+36}");
+            else if (file is DriveInfo)
+                Console.Write($"{(file as DriveInfo).Name,+36}");
         }
 
         public static void DrawPathes(ESection esection, string path1, string path2)
@@ -268,6 +279,13 @@ namespace FileManager
                         Console.Write(" " + (Files[i] as FileInfo).Name.Substring(0, Config.QuarterWindowWidth - 2));
                     else
                         Console.Write(" " + (Files[i] as FileInfo).Name);
+                }
+                else if (Files[i] is DriveInfo)
+                {
+                    if ((Files[i] as DriveInfo).Name.Length > Config.QuarterWindowWidth - 2)
+                        Console.Write(" " + (Files[i] as DriveInfo).Name.Substring(0, Config.QuarterWindowWidth - 2));
+                    else
+                        Console.Write(" " + (Files[i] as DriveInfo).Name);
                 }
                 else if (Files[i] is FolderUp)
                 {

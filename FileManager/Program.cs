@@ -7,6 +7,7 @@ using System.Collections;
 using System.IO;
 using System.Diagnostics;
 using System.Security.AccessControl;
+using System.Threading;
 
 namespace FileManager
 {
@@ -14,6 +15,8 @@ namespace FileManager
     {
         static void Main(string[] args)
         {
+            Console.SetBufferSize(Config.StartupWindowWidth, Config.StartupWindowHeight);
+
             FileManager manager = new FileManager("File Manager");
 
             GUI.DrawMenu(manager.FileManagerName);
@@ -60,7 +63,7 @@ namespace FileManager
                             {
                                 if (manager.GetCurrentFile() is FileInfo)
                                 {
-                                    try { Process.Start((manager.GetCurrentFile() as FileInfo).Name); }
+                                    try { Process.Start(manager.GetSelectedPath()); }
                                     catch (Exception) { }
                                     break;
                                 }
@@ -83,6 +86,7 @@ namespace FileManager
                                 canReturn = true;
                             }
                             break;
+                        case ConsoleKey.Escape:
                         case ConsoleKey.Backspace:
                             {
                                 manager.ChangeDirectory("..");
@@ -105,6 +109,9 @@ namespace FileManager
                             break;
                         case ConsoleKey.F2:
                             {
+                                if (!manager.CanCreate())
+                                    break;
+
                                 string fileName;
                                 try
                                 { fileName = TextBox.GetMessageBox(); }
@@ -139,6 +146,9 @@ namespace FileManager
                             break;
                         case ConsoleKey.F3:
                             {
+                                if (!manager.CanCreate())
+                                    break;
+
                                 string name;
                                 try
                                 { name = TextBox.GetMessageBox(); }
@@ -184,20 +194,11 @@ namespace FileManager
                                 canReturn = true;
                             }
                             break;
-                        case ConsoleKey.F8:
-                            {
-                                MsgBox.Action = "Delete";
-                                MsgBox.Text = "Do you really want to delete?";
-
-                                if (MsgBox.GetMessageBox())
-                                    manager.DeleteCurrentFile();
-
-                                manager.Reload();
-                                canReturn = true;
-                            }
-                            break;
                         case ConsoleKey.F5:
                             {
+                                if (manager.GetCurrentFile() is FolderUp || manager.GetCurrentFile() is DriveInfo)
+                                    break;
+
                                 MsgBox.Action = "Copy";
                                 MsgBox.Text = "Do you really want to copy?";
 
@@ -210,6 +211,9 @@ namespace FileManager
                             break;
                         case ConsoleKey.F6:
                             {
+                                if (manager.GetCurrentFile() is FolderUp || manager.GetCurrentFile() is DriveInfo)
+                                    break;
+
                                 MsgBox.Action = "Move";
                                 MsgBox.Text = "Do you really want to move?";
 
@@ -256,6 +260,66 @@ namespace FileManager
                                 canReturn = true;
                             }
                             break;
+                        case ConsoleKey.F8:
+                            {
+                                if (manager.GetCurrentFile() is FolderUp || manager.GetCurrentFile() is DriveInfo)
+                                    break;
+
+                                MsgBox.Action = "Delete";
+                                MsgBox.Text = "Do you really want to delete?";
+
+                                if (MsgBox.GetMessageBox())
+                                    manager.DeleteCurrentFile();
+
+                                manager.Reload();
+                                canReturn = true;
+                            }
+                            break;
+                        case ConsoleKey.F9:
+                            {
+                                manager.DisplayDisks();
+                                canReturn = true;
+                            }
+                            break;
+                        case ConsoleKey.F10:
+                            {
+                                if (manager.GetCurrentFile() is FolderUp || manager.GetCurrentFile() is DriveInfo)
+                                    break;
+
+                                string name;
+                                try
+                                { name = TextBox.GetMessageBox(); }
+                                catch (Exception)
+                                {
+                                    manager.Reload();
+                                    canReturn = true;
+                                    break;
+                                }
+
+                                try
+                                { manager.RenameFile(name); }
+                                catch (Exception ex)
+                                {
+                                    if (ex is UnauthorizedAccessException)
+                                    {
+                                        InfMsgBox.Action = "Error";
+                                        InfMsgBox.Text = "You don't have permissions enough.";
+                                        InfMsgBox.GetMessageBox();
+                                    }
+                                    else
+                                    {
+                                        InfMsgBox.Action = "Error";
+                                        InfMsgBox.Text = "Name contains incorrect symbols.";
+                                        InfMsgBox.GetMessageBox();
+                                    }
+                                }
+
+                                manager.Reload();
+                                canReturn = true;
+                            }
+                            break;
+                        case ConsoleKey.F12:
+                                return;
                         default:
                             break;
                     }

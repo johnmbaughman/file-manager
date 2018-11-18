@@ -27,10 +27,12 @@ namespace FileManager
         public DirectoryInfo RDirectory { get; set; } = new DirectoryInfo(Config.RightSectionPath);
 
         private Searcher _searcher;
+        private Drives _drives;
 
         public FileManager(string fileManagerName)
         {
             _searcher = new Searcher();
+            _drives = new Drives();
 
             Console.BackgroundColor = Config.BackgroundColor;
             Console.ForegroundColor = Config.ForegroundColor;
@@ -75,7 +77,8 @@ namespace FileManager
                 Console.BackgroundColor = Config.BackgroundColor;
                 Console.SetCursorPosition(Config.HalfWindowWidth + 2, 3);
                 Console.Write($"Current path: {GUI.GetNormalString(RPath, Config.HalfWindowWidth - 19)}");
-
+                
+                // Exception
                 Directory.SetCurrentDirectory(LDirectory.FullName);
             }
             else if (Esection == ESection.Left)
@@ -108,7 +111,7 @@ namespace FileManager
                 LFiles.AddRange(results);
 
                 LeftSection = new LeftSection(LFiles);
-                LeftSection.IsDisplayingSearchResults = true;
+                LeftSection.Displaying = IsDisplaying.Search;
             }
             else
             {
@@ -117,15 +120,42 @@ namespace FileManager
                 RFiles.AddRange(results);
 
                 RightSection = new RightSection(RFiles);
-                RightSection.IsDisplayingSearchResults = true;
+                RightSection.Displaying = IsDisplaying.Search;
+            }
+        }
+
+        public void SetDisks(List<DriveInfo> results)
+        {
+            if (Esection == ESection.Left)
+            {
+                LFiles = new ArrayList();
+                LFiles.Add(new FolderUp());
+                LFiles.AddRange(results);
+
+                LeftSection = new LeftSection(LFiles);
+                LeftSection.Displaying = IsDisplaying.Disks;
+            }
+            else
+            {
+                RFiles = new ArrayList();
+                RFiles.Add(new FolderUp());
+                RFiles.AddRange(results);
+
+                RightSection = new RightSection(RFiles);
+                RightSection.Displaying = IsDisplaying.Disks;
             }
         }
 
         public void SetLeftSectionFiles()
         {
-            if (LeftSection.IsDisplayingSearchResults)
+            if (LeftSection.Displaying == IsDisplaying.Search)
             {
                 SetSearchResults(_searcher.GetResults());
+                return;
+            }
+            else if (LeftSection.Displaying == IsDisplaying.Disks)
+            {
+                SetDisks(_drives.Disks);
                 return;
             }
 
@@ -139,9 +169,14 @@ namespace FileManager
 
         public void SetRightSectionFiles()
         {
-            if (RightSection.IsDisplayingSearchResults)
+            if (RightSection.Displaying == IsDisplaying.Search)
             {
                 SetSearchResults(_searcher.GetResults());
+                return;
+            }
+            else if (RightSection.Displaying == IsDisplaying.Disks)
+            {
+                SetDisks(_drives.Disks);
                 return;
             }
 
@@ -178,13 +213,13 @@ namespace FileManager
             if (Esection == ESection.Left)
             {
                 LDirectory = tmp;          
-                LeftSection.IsDisplayingSearchResults = false;
+                LeftSection.Displaying = IsDisplaying.Files;
                 SetLeftSectionFiles();
             }
             else
             {
                 RDirectory = tmp;
-                RightSection.IsDisplayingSearchResults = false;
+                RightSection.Displaying = IsDisplaying.Files;
                 SetRightSectionFiles();
             }
 
@@ -253,8 +288,43 @@ namespace FileManager
             GUI.DrawName();
         }
 
+        public bool CanCreate()
+        {
+            if (Esection == ESection.Left)
+                if (LeftSection.Displaying == IsDisplaying.Disks || LeftSection.Displaying == IsDisplaying.Search)
+                    return false;
+            else
+                if (RightSection.Displaying == IsDisplaying.Disks || RightSection.Displaying == IsDisplaying.Search)
+                    return false;
+
+            return true;
+        }
+
+        public bool IsDispayingDisks()
+        {
+            if (Esection == ESection.Left)
+                if (LeftSection.Displaying == IsDisplaying.Disks)
+                    return true;
+                else
+                if (RightSection.Displaying == IsDisplaying.Disks)
+                    return true;
+
+            return false;
+        }
+
         public void DeleteCurrentFile()
         {
+            try
+            {
+                if (Esection == ESection.Left)
+                    if (LeftSection.Displaying == IsDisplaying.Search)
+                        _searcher.Results.Remove(GetCurrentFile());
+                    else
+                    if (LeftSection.Displaying == IsDisplaying.Search)
+                        _searcher.Results.Remove(GetCurrentFile());
+            }
+            catch (Exception) { }
+
             if (GetCurrentFile() is FileInfo)
                 File.Delete(GetSelectedPath());
             else if (GetCurrentFile() is DirectoryInfo)
@@ -331,7 +401,7 @@ namespace FileManager
                 string creationTime = (GetCurrentFile() as FileInfo).CreationTimeUtc.ToShortTimeString();
                 inf += $"Size: {length.ToString("F3")} MB. Creation time: {creation} {creationTime}";
             }
-            else
+            else if (GetCurrentFile() is DirectoryInfo)
             {
                 Counter c = new Counter();
                 c.CountSize(new DirectoryInfo(GetSelectedPath()));
@@ -341,6 +411,13 @@ namespace FileManager
                 int fcount = c.FilesCount;
                 int dcount = c.DirectoriesCount;
                 inf += $"Size: {length.ToString("F3")} MB. Files: {fcount}. Folders: {dcount}";
+            }
+            else if (GetCurrentFile() is DriveInfo)
+            {
+                long freeSpace = (GetCurrentFile() as DriveInfo).AvailableFreeSpace / (long)Math.Pow(1024, 3);
+                long totalSpace = (GetCurrentFile() as DriveInfo).TotalSize / (long)Math.Pow(1024, 3);
+
+                inf += $"Free space: {freeSpace.ToString("F3")} Gb / {totalSpace.ToString("F3")} Gb";
             }
 
             return inf;
@@ -363,6 +440,28 @@ namespace FileManager
 
                 return currentFile.Attributes.ToString();
             }
+        }
+
+        public void RenameFile(string newName)
+        {
+            if (GetCurrentFile() is FileInfo)
+            {
+                (GetCurrentFile() as FileInfo).MoveTo(newName);
+            }
+            else if (GetCurrentFile() is DirectoryInfo)
+            {
+                if (GetCurrentFile() is DirectoryInfo)
+                {
+                    (GetCurrentFile() as DirectoryInfo).MoveTo(newName);
+                }
+            }
+        }
+
+        public void DisplayDisks()
+        {
+            _drives.SetDrives();
+            SetDisks(_drives.Disks);
+            DisplayFiles();
         }
 
         public void CreateFolder(string name)
@@ -393,10 +492,22 @@ namespace FileManager
         public void SearchFile(string name)
         {
             _searcher.Clear();
-            _searcher.Search(new DirectoryInfo(GetCurrentPath()), name);
+            if (IsDispayingDisks())
+            {
+                foreach (var i in _drives.Disks)
+                {
+                    _searcher.Search(new DirectoryInfo(i.Name), name);
+                }
+            }
+            else
+            {
+                _searcher.Search(new DirectoryInfo(GetCurrentPath()), name);
+            }
 
-            try { SetSearchResults(_searcher.GetResults()); }
-            catch(Exception) { throw; }
+            if (_searcher.Results.Count == 0)
+                throw new NoResultException("no results");
+
+            SetSearchResults(_searcher.GetResults());
         }
     }
 }

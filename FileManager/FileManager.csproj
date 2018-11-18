@@ -47,6 +47,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Counter.cs" />
     <Compile Include="Cursor.cs" />
+    <Compile Include="Drives.cs" />
     <Compile Include="FileManager.cs" />
     <Compile Include="FolderUp.cs" />
     <Compile Include="GUI.cs" />

@@ -35,6 +35,8 @@ namespace FileManager
                     FileNames.Add((i as FileInfo).Name);
                 else if (i is FolderUp)
                     FileNames.Add((i as FolderUp).Name);
+                else if (i is DriveInfo)
+                    FileNames.Add((i as DriveInfo).Name);
             }
         }
 

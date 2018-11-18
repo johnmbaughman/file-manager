@@ -115,7 +115,7 @@ namespace FileManager
         public new bool GetMessageBox()
         {
             base.GetMessageBox();
-            bool selectedOK = true;
+            bool selectedOK = false;
 
             while (true)
             {

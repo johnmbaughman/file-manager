@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace FileManager
 {
@@ -24,9 +25,6 @@ namespace FileManager
 
         public ArrayList GetResults()
         {
-            if (Results.Count == 0)
-                throw new NoResultException();
-
             return Results;
         }
 
@@ -42,14 +40,14 @@ namespace FileManager
                 {
                     if (file is DirectoryInfo)
                     {
-                        if ((file as DirectoryInfo).Name.Contains(fileName))
+                        if (Regex.IsMatch((file as DirectoryInfo).Name, fileName))
                             Results.Add(file);
 
                         Search(file as DirectoryInfo, fileName);
                     }
                     else
                     {
-                        if ((file as FileInfo).Name.Contains(fileName))
+                        if (Regex.IsMatch((file as FileInfo).Name, fileName))
                             Results.Add(file);
                     }
                 }

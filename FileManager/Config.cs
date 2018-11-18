@@ -16,8 +16,8 @@ namespace FileManager
         public static ConsoleColor  MsgBoxForegroundColor           = ConsoleColor.Black;
         public static ConsoleColor  AdditionalMsgBoxBackgroundColor = ConsoleColor.Red;
         public static ConsoleColor  TextBoxBackgroundColor          = ConsoleColor.Gray;
-        public static string        LeftSectionPath                 = @"C:\Users\Valeriy\Desktop\";
-        public static string        RightSectionPath                = @"C:\Users\Valeriy\Desktop\";
+        public static string        LeftSectionPath                 = @".";
+        public static string        RightSectionPath                = @".";
         public static int           StartupWindowWidth              = /*Console.LargestWindowWidth;*/120; // Default - 120
         public static int           StartupWindowHeight             = /*Console.LargestWindowHeight;*/30; // Default - 30
 
