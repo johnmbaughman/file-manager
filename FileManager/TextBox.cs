@@ -18,6 +18,7 @@ namespace FileManager
         public new string GetMessageBox()
         {
             base.GetMessageBox();
+            base.Draw();
 
             Console.SetCursorPosition(x + ((msgbWidth) / 2), y + msgbHeigth - 3);
             Console.BackgroundColor = Config.AdditionalMsgBoxBackgroundColor;

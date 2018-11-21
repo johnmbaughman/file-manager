@@ -8,17 +8,17 @@ using System.IO;
 
 namespace FileManager
 {
-    public abstract class Cursor
+    public class Cursor
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public int Count { get; private set; }
         public ArrayList Files { get; set; }
         public string LineBefore { get; private set; }
         public int Index { get; set; }
         public List<string> FileNames { get; set; }
 
-        protected Cursor(int x, int y, ArrayList files)
+        public Cursor(int x, int y, ArrayList files)
         {
             X = x;
             Y = y;
@@ -37,6 +37,8 @@ namespace FileManager
                     FileNames.Add((i as FolderUp).Name);
                 else if (i is DriveInfo)
                     FileNames.Add((i as DriveInfo).Name);
+                else if (i is String)
+                    FileNames.Add(i as String);
             }
         }
 

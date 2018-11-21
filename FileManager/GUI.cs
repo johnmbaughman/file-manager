@@ -94,7 +94,7 @@ namespace FileManager
             Console.Write("F10 Rename");
             Console.SetCursorPosition(Console.CursorLeft + num, Console.WindowHeight - 1);
 
-            Console.Write("F12 Exit");
+            Console.Write("F12 Options");
 
             Console.BackgroundColor = Config.BackgroundColor;
             Console.ForegroundColor = Config.ForegroundColor;
@@ -237,14 +237,14 @@ namespace FileManager
         public static void CleanScreen(int X, int Y)
         {
             Console.SetCursorPosition(X, Y);
-            for (int i = 0; Console.CursorTop < Console.WindowHeight - 4; i++)
+            for (int i = 0; Console.CursorTop < Config.WindowHeight - 1; i++)
             {
                 Console.Write(GetNormalString("", Config.QuarterWindowWidth - 1));
                 Console.SetCursorPosition(X, ++Console.CursorTop);
             }
 
             Console.SetCursorPosition(X + Config.QuarterWindowWidth, Y);
-            for (int i = 0; Console.CursorTop < Console.WindowHeight - 4; i++)
+            for (int i = 0; Console.CursorTop < Config.WindowHeight - 1; i++)
             {
                 Console.Write(GetNormalString("", Config.QuarterWindowWidth - 1));
                 Console.SetCursorPosition(X + Config.QuarterWindowWidth, ++Console.CursorTop);

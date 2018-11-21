@@ -37,6 +37,7 @@ namespace FileManager
             Console.BackgroundColor = Config.BackgroundColor;
             Console.ForegroundColor = Config.ForegroundColor;
             Console.SetWindowSize(Config.StartupWindowWidth, Config.StartupWindowHeight);
+            Console.SetBufferSize(Config.StartupWindowWidth, Config.StartupWindowHeight);
 
             FileManagerName = fileManagerName;
             Esection = ESection.Left;
@@ -102,8 +103,31 @@ namespace FileManager
             }
         }
 
-        public void SetSearchResults(ArrayList results)
+        public void SetSearchResults(ArrayList results, bool advMode = false, bool flag = false)
         {
+            if (advMode)
+            {
+                if (flag)
+                {
+                    LFiles = new ArrayList();
+                    LFiles.Add(new FolderUp());
+                    LFiles.AddRange(results);
+
+                    LeftSection = new LeftSection(LFiles);
+                    LeftSection.Displaying = IsDisplaying.Search;
+                }
+                else
+                {
+                    RFiles = new ArrayList();
+                    RFiles.Add(new FolderUp());
+                    RFiles.AddRange(results);
+
+                    RightSection = new RightSection(RFiles);
+                    RightSection.Displaying = IsDisplaying.Search;
+                }
+                return;
+            }
+
             if (Esection == ESection.Left)
             {
                 LFiles = new ArrayList();
@@ -150,7 +174,7 @@ namespace FileManager
         {
             if (LeftSection.Displaying == IsDisplaying.Search)
             {
-                SetSearchResults(_searcher.GetResults());
+                SetSearchResults(_searcher.GetResults(), true, true);
                 return;
             }
             else if (LeftSection.Displaying == IsDisplaying.Disks)
@@ -171,7 +195,7 @@ namespace FileManager
         {
             if (RightSection.Displaying == IsDisplaying.Search)
             {
-                SetSearchResults(_searcher.GetResults());
+                SetSearchResults(_searcher.GetResults(), true, false);
                 return;
             }
             else if (RightSection.Displaying == IsDisplaying.Disks)
@@ -317,11 +341,15 @@ namespace FileManager
             try
             {
                 if (Esection == ESection.Left)
+                {
                     if (LeftSection.Displaying == IsDisplaying.Search)
                         _searcher.Results.Remove(GetCurrentFile());
-                    else
-                    if (LeftSection.Displaying == IsDisplaying.Search)
+                }
+                else if (Esection == ESection.Right)
+                {
+                    if (RightSection.Displaying == IsDisplaying.Search)
                         _searcher.Results.Remove(GetCurrentFile());
+                }
             }
             catch (Exception) { }
 
@@ -333,10 +361,18 @@ namespace FileManager
                 return;
         }
 
-        public void MoveCurrentFile()
+        public void MoveCurrentFile(bool replace = false)
         {
             if (Esection == ESection.Left)
             {
+                if (replace)
+                {
+                    if (File.Exists(RPath + "\\" + GetSelectedPath(false)))
+                        File.Delete(RPath + "\\" + GetSelectedPath(false));
+                    else if (Directory.Exists(RPath + "\\" + GetSelectedPath(false)))
+                        Directory.Delete(RPath + "\\" + GetSelectedPath(false), true);
+                }
+
                 if (GetCurrentFile() is FileInfo)
                     (GetCurrentFile() as FileInfo).MoveTo(RPath + "\\" + GetSelectedPath(false));
                 else if (GetCurrentFile() is DirectoryInfo)
@@ -346,6 +382,14 @@ namespace FileManager
             }
             else
             {
+                if (replace)
+                {
+                    if (File.Exists(LPath + "\\" + GetSelectedPath(false)))
+                        File.Delete(LPath + "\\" + GetSelectedPath(false));
+                    else if (Directory.Exists(LPath + "\\" + GetSelectedPath(false)))
+                        Directory.Delete(LPath + "\\" + GetSelectedPath(false), true);
+                }
+
                 if (GetCurrentFile() is FileInfo)
                     (GetCurrentFile() as FileInfo).MoveTo(LPath + "\\" + GetSelectedPath(false));
                 else if (GetCurrentFile() is DirectoryInfo)
@@ -355,10 +399,18 @@ namespace FileManager
             }
         }
 
-        public void CopyCurrentFile()
+        public void CopyCurrentFile(bool replace = false)
         {
             if (Esection == ESection.Left)
             {
+                if (replace)
+                {
+                    if (File.Exists(RPath + "\\" + GetSelectedPath(false)))
+                        File.Delete(RPath + "\\" + GetSelectedPath(false));
+                    else if (Directory.Exists(RPath + "\\" + GetSelectedPath(false)))
+                        Directory.Delete(RPath + "\\" + GetSelectedPath(false), true);
+                }
+
                 if (GetCurrentFile() is FileInfo)
                     (GetCurrentFile() as FileInfo).CopyTo(RPath + "\\" + GetSelectedPath(false));
                 else if (GetCurrentFile() is DirectoryInfo)
@@ -370,6 +422,14 @@ namespace FileManager
             }
             else
             {
+                if (replace)
+                {
+                    if (File.Exists(LPath + "\\" + GetSelectedPath(false)))
+                        File.Delete(LPath + "\\" + GetSelectedPath(false));
+                    else if (Directory.Exists(LPath + "\\" + GetSelectedPath(false)))
+                        Directory.Delete(LPath + "\\" + GetSelectedPath(false), true);
+                }
+
                 if (GetCurrentFile() is FileInfo)
                     (GetCurrentFile() as FileInfo).CopyTo(LPath + "\\" + GetSelectedPath(false));
                 else if (GetCurrentFile() is DirectoryInfo)
@@ -491,6 +551,11 @@ namespace FileManager
 
         public void SearchFile(string name)
         {
+            if (LeftSection.Displaying == IsDisplaying.Search || RightSection.Displaying == IsDisplaying.Search)
+            {
+                throw new InvalidOperationException();
+            }
+
             _searcher.Clear();
             if (IsDispayingDisks())
             {
