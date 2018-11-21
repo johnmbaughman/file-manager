@@ -379,6 +379,11 @@ namespace FileManager
                     (GetCurrentFile() as DirectoryInfo).MoveTo(RPath + "\\" + GetSelectedPath(false));
                 else
                     return;
+
+                if (LeftSection.Displaying == IsDisplaying.Search)
+                {
+                    _searcher.Results.Remove(GetCurrentFile());
+                }
             }
             else
             {
@@ -396,6 +401,11 @@ namespace FileManager
                     (GetCurrentFile() as DirectoryInfo).MoveTo(LPath + "\\" + GetSelectedPath(false));
                 else
                     return;
+
+                if (RightSection.Displaying == IsDisplaying.Search)
+                {
+                    _searcher.Results.Remove(GetCurrentFile());
+                }
             }
         }
 
