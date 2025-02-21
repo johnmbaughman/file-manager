@@ -5,11 +5,11 @@ using FileManager.Core.ViewModels;
 
 namespace FileManager.Core.Views;
 
-public partial class MainView : WindowView, IRecipient<Message>
+public partial class FilePanelsView: SubView, IRecipient<Message>
 {
-    public MainView(MainViewModel viewModel) : base(viewModel)
+    public FilePanelsView(IViewModel viewModel) : base(viewModel)
     {
-        WeakReferenceMessenger.Default.Register(this);
+        ViewModel = (FilePanelsViewModel)base.ViewModel;
         InitializeComponent();
         Initialized += async (_, _) => await ViewModel.Initialized().ConfigureAwait(false);
     }
@@ -18,4 +18,6 @@ public partial class MainView : WindowView, IRecipient<Message>
     {
 
     }
+
+    public new FilePanelsViewModel ViewModel { get; }
 }
