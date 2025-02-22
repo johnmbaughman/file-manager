@@ -2,9 +2,9 @@
 
 namespace FileManager.Core.Views;
 
-public partial class ButtonPanelView
+public partial class ButtonPanelView<T>
 {
-    public override void InitializeComponent()
+    public sealed override void InitializeComponent()
     {
         // TODO: Get button configuration from JSON
         string[] buttonNames = new string[]

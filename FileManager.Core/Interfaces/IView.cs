@@ -1,8 +1,8 @@
 ﻿namespace FileManager.Core.Interfaces;
 
-public interface IView
+public interface IView<T>
 {
     void InitializeComponent();
 
-    IViewModel ViewModel { get; }
+    T ViewModel { get; }
 }

@@ -3,11 +3,11 @@ using Terminal.Gui;
 
 namespace FileManager.Core.Views;
 
-public partial class FilePanelsView
+public partial class FilePanelsView<T>
 {
     public override void InitializeComponent()
     {
-        var leftPanel = new PanelView(new PanelViewModel())
+        var leftPanel = new PanelView<PanelViewModel>(new PanelViewModel())
         {
             X = 0,
             Y = 0,
@@ -18,7 +18,7 @@ public partial class FilePanelsView
         };
         Add(leftPanel);
 
-        var rightPanel = new PanelView(new PanelViewModel())
+        var rightPanel = new PanelView<PanelViewModel>(new PanelViewModel())
         {
             X = Pos.Right(leftPanel) - 1,
             Y = 0,

@@ -1,20 +1,19 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using FileManager.Core.Interfaces;
+﻿using FileManager.Core.Interfaces;
 using FileManager.Core.Models;
 using FileManager.Core.ViewModels;
 
 namespace FileManager.Core.Views;
 
-public partial class MainView : WindowView, IRecipient<Message>
+public partial class MainView<T> : WindowView<T> where T : MainViewModel
 {
-    public MainView(MainViewModel viewModel) : base(viewModel)
+    public MainView(T viewModel) : base(viewModel)
     {
-        WeakReferenceMessenger.Default.Register(this);
+        
         InitializeComponent();
         Initialized += async (_, _) => await ViewModel.Initialized().ConfigureAwait(false);
     }
 
-    public void Receive(Message message)
+    public override void Receive(Message message)
     {
 
     }

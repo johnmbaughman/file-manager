@@ -1,23 +1,34 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using FileManager.Core.Interfaces;
+﻿using FileManager.Core.Interfaces;
 using FileManager.Core.Models;
 using FileManager.Core.ViewModels;
+using Terminal.Gui;
 
 namespace FileManager.Core.Views;
 
-public partial class PanelView : SubView, IRecipient<Message>
+public partial class PanelView<T> : SubView<T> where T : PanelViewModel
 {
-    public PanelView(IViewModel viewModel) : base(viewModel)
+    public PanelView(T viewModel) : base(viewModel)
     {
-        ViewModel = (PanelViewModel)base.ViewModel;
         InitializeComponent();
         Initialized += async (_, _) => await ViewModel.Initialized().ConfigureAwait(false);
     }
 
-    public void Receive(Message message)
+    public override void Receive(Message message)
     {
-
+        ViewModel.Path = "Path will be here";
+        ViewModel.Status = "Loaded...";
+        SetPathText();
+        SetStatusText();
+        Application.LayoutAndDraw();
     }
 
-    public new PanelViewModel ViewModel { get; }
+    private void SetStatusText()
+    {
+        _statusBox.Text = ViewModel.Status;
+    }
+
+    private void SetPathText()
+    {
+        _pathBox.Text = ViewModel.Path;
+    }
 }

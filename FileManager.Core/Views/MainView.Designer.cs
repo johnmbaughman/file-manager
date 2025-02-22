@@ -3,7 +3,7 @@ using Terminal.Gui;
 
 namespace FileManager.Core.Views;
 
-public partial class MainView
+public partial class MainView<T>
 {
     public sealed override void InitializeComponent()
     {
@@ -31,7 +31,7 @@ public partial class MainView
         };
         mainView.Add(titleLabel);
 
-        mainView.Add(new FilePanelsView(new FilePanelsViewModel())
+        mainView.Add(new FilePanelsView<FilePanelsViewModel>(new FilePanelsViewModel())
         {
             X = -1,
             Y = Pos.Bottom(titleLabel) - 1,
@@ -40,7 +40,7 @@ public partial class MainView
             Arrangement = ViewArrangement.Overlapped
         });
 
-        Add(new ButtonPanelView(new ButtonPanelViewModel())
+        Add(new ButtonPanelView<ButtonPanelViewModel>(new ButtonPanelViewModel())
         {
             Y = Pos.Bottom(mainView),
             Width = Dim.Fill(),
